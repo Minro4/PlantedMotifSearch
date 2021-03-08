@@ -13,7 +13,6 @@ namespace PlantedMotifSearch
             Sequence = sequence;
             this.dist = dist;
         }
-
         /*
         int IComparable.CompareTo(object obj)
         {

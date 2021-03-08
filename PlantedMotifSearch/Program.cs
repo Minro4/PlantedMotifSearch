@@ -12,7 +12,7 @@ namespace PlantedMotifSearch
         static void Main(string[] args)
         {
             var gen = new SequenceGenerator(alphabet);
-            new Accuracy(gen).TestMultiple(13, 15, 4, 6, 10, "test.xlsx");
+            new Accuracy(gen).TestMultiple(13, 50, 4, 25, 10, "test.xlsx");
 
             /* (var motif, var s) = gen.PlantedMotif(l, d, 20, 600);
 

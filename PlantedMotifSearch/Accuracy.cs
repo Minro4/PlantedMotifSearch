@@ -23,18 +23,27 @@ namespace PlantedMotifSearch
             int[,] accuracy = new int[lenL, lenD];
             int[,] time = new int[lenL, lenD];
 
+            Workbook workbook = new Workbook();
+            Worksheet worksheet = workbook.Worksheets[0];
+
             for (int l = 0; l < lenL; l++)
             {
                 for (int d = 0; d < lenD; d++)
                 {
-                    var (a, t) = Test(l + startL, d + startD, sampleSize);
-                    accuracy[l, d] = a;
-                    time[l, d] = (int) t;
+                    if (d + startD < l + startL)
+                    {
+                        var (a, t) = Test(l + startL, d + startD, sampleSize);
+                        accuracy[l, d] = a;
+                        time[l, d] = (int) t;
+                    }
                 }
+
+
+                worksheet.Cells.ImportArray(accuracy, 0, 0);
+                worksheet.Cells.ImportArray(time, lenL + 1, 0);
+                workbook.Save(l + fileName);
             }
 
-            Workbook workbook = new Workbook();
-            Worksheet worksheet = workbook.Worksheets[0];
             worksheet.Cells.ImportArray(accuracy, 0, 0);
             worksheet.Cells.ImportArray(time, lenL + 1, 0);
             workbook.Save(fileName);
