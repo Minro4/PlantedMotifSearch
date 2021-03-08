@@ -25,8 +25,10 @@ namespace PlantedMotifSearch.SequenceGeneration
                 var seq = RandomSequence(seqLen);
 
                 //insertMotif
-                var rndMotif = RandomNeighbourOfDist(motif, d);
-                var startIdx = rnd.Next(seqLen - l);
+                var genD = rnd.Next(d + 1);
+                //Console.WriteLine(genD);
+                var rndMotif = RandomNeighbourOfDist(motif, genD);
+                var startIdx = i == 0 ? 0 : rnd.Next(seqLen - l);
                 seq.SetSequence(rndMotif, startIdx);
 
                 seqs.Add(seq);
@@ -34,6 +36,7 @@ namespace PlantedMotifSearch.SequenceGeneration
 
             return (motif, seqs);
         }
+
 
         public Sequence RandomSequence(int len)
         {
@@ -57,7 +60,7 @@ namespace PlantedMotifSearch.SequenceGeneration
         public IList<Sequence> Neighbours(Sequence sequence, int d)
         {
             var n = new List<Sequence>();
-            n.Add(sequence);
+            //n.Add(sequence);
 
             for (int dist = 1; dist <= d; dist++)
             {

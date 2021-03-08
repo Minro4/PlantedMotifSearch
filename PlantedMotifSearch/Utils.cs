@@ -23,5 +23,18 @@ namespace PlantedMotifSearch
                 .SelectMany(t => list.Where(o => o.CompareTo(t.Last()) > 0),
                     (t1, t2) => t1.Concat(new T[] {t2}));
         }
+
+        public static double NbrCombinations(int n, int r)
+        {
+            return Factorial(n, n - r) / Factorial(r);
+        }
+
+        public static double Factorial(int n, int stop = 0)
+        {
+            if (n == stop + 1)
+                return stop + 1;
+
+            return n * Factorial(n - 1, stop);
+        }
     }
 }

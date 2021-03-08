@@ -123,5 +123,10 @@ namespace PlantedMotifSearch
                 s += this[i];
             return s;
         }
+
+        public int MotifDistance(List<Sequence> sequences)
+        {
+            return sequences.Select(s => s.MotifHammingDist(this)).Max();
+        }
     }
 }

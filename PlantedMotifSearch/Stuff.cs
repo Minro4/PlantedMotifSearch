@@ -12,7 +12,7 @@ namespace PlantedMotifSearch
             _generator = generator;
         }
 
-        public (Sequence, int[]) Search(List<Sequence> sequences, int l, int d)
+        public Sequence Search(List<Sequence> sequences, int l, int d)
         {
             var a = sequences[0].CommonMers(sequences[1].Mers(l), l, d * 2);
             throw new System.NotImplementedException();

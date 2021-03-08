@@ -14,69 +14,122 @@ namespace PlantedMotifSearch
             _generator = generator;
         }
 
-        public (Sequence, int[]) Search(List<Sequence> sequences, int l, int d)
+        public bool SearchOnce(List<Sequence> sequences, int l, int d)
         {
-            Sequence best = null;
-            var bestValue = int.MaxValue;
+            var mers = sequences[0].SubSequence(0, l);
+
+            var res = Climb(mers, sequences, d, 1);
+
+            return (int) res.dist <= d;
+        }
+
+        public Sequence Search(List<Sequence> sequences, int l, int d)
+        {
+            var best = new HillMotif(null, double.MaxValue);
 
             foreach (var sequence in sequences[0].Mers(l))
             {
-                var current = sequence;
+                var res = Climb(sequence, sequences, d, 1);
 
-                for (int j = 0; j < 20; j++)
+                Console.WriteLine(res.dist);
+
+                if (res.dist < best.dist)
                 {
-                    var newC = RandomSearch(current, sequences);
-                    if (newC == current)
-                        break;
-                    current = newC;
-                    Console.WriteLine("small one:" + value(current, sequences) + " : " + subValueSqr(current, sequences));
+                    best = res;
                 }
 
-                var v = value(current, sequences);
-                Console.WriteLine("big one:" + v);
-
-                if (v < bestValue)
-                {
-                    best = current;
-                    bestValue = v;
-                }
+                if ((int) best.dist <= d)
+                    break;
 
 
                 // return (current, new int[1]);
             }
 
-            Console.WriteLine("BEST ONE:" + value(best, sequences));
-            return (best, new int[1]);
+            Console.WriteLine("BEST ONE:" + best.Sequence.MotifDistance(sequences));
+            return best.Sequence;
+        }
+
+        public List<Sequence> Test(List<Sequence> sequences, int l, int d)
+        {
+            var motifs = new List<Sequence>();
+
+            foreach (var sequence in sequences[0].Mers(l))
+            {
+                var res = Climb2(sequence, sequences, d);
+
+                Console.WriteLine(res.dist);
+                Console.WriteLine(sequence.toString());
+                Console.WriteLine(res.Sequence.toString());
+
+                if ((int) res.dist <= d)
+                    motifs.Add(res.Sequence);
+
+
+                // return (current, new int[1]);
+            }
+
+            return motifs;
         }
 
 
-        public Sequence RandomSearch(Sequence motif, List<Sequence> sequences)
+        public HillMotif Climb(Sequence motif, List<Sequence> sequences, int d, int childExploration)
         {
-            Sequence best = motif;
-            var bestValue = value(motif, sequences);
-            var bestSVS = subValueSqr(motif, sequences);
-
-            var n = _generator.Neighbours(motif, 2);
-            foreach (var s in n)
+            var l = new List<HillMotif>();
+            l.Add(new HillMotif(motif, value(motif, sequences)));
+            foreach (var s in _generator.Neighbours(motif, 1))
             {
-                var val = value(s, sequences);
-                var svs = subValueSqr(s, sequences);
-                if (val < bestValue || (val == bestValue && svs < bestSVS))
+                l.Add(new HillMotif(s, value(s, sequences)));
+            }
+
+            l = l.OrderBy((x) => x.dist).ToList();
+
+            var best = new HillMotif(motif, value(motif, sequences));
+
+            for (int i = 0; i <= childExploration; i++)
+            {
+                if ((int) l[i].dist <= d)
+                    return l[i];
+
+                if (l[i].Sequence != motif)
                 {
-                    best = s;
-                    bestValue = val;
-                    bestSVS = svs;
+                    var res = Climb(l[i].Sequence, sequences, d, childExploration / 2);
+
+                    if (res.dist < best.dist)
+                    {
+                        best = res;
+                    }
                 }
             }
 
             return best;
         }
 
-
-        private int value(Sequence motif, List<Sequence> sequences)
+        public HillMotif Climb2(Sequence motif, List<Sequence> sequences, int maxDepth)
         {
-            var distances = sequences.Select(s => s.MotifHammingDist(motif));
-            return distances.Max();
+            if (maxDepth == 0)
+                return new HillMotif(motif, value(motif, sequences));
+
+            var best = new HillMotif(motif, value(motif, sequences));
+            foreach (var s in _generator.Neighbours(motif, 1))
+            {
+                var n = new HillMotif(s, value(s, sequences));
+
+                if (n.dist < best.dist)
+                {
+                    best = n;
+                }
+            }
+
+            return Climb2(best.Sequence, sequences, maxDepth - 1);
+        }
+
+
+        private double value(Sequence motif, List<Sequence> sequences)
+        {
+            var dists = sequences.Select(s => s.MotifHammingDist(motif));
+            var intP = dists.Max();
+            var dP = dists.Select(v => v * v).Sum();
+            return intP + ((double) dP / 20000);
         }
 
         private int subValue(Sequence motif, List<Sequence> sequences)

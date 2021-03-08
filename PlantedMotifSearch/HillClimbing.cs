@@ -14,7 +14,7 @@ namespace PlantedMotifSearch
             _generator = generator;
         }
 
-        public (Sequence, int[]) Search(List<Sequence> sequences, int l, int d)
+        public Sequence Search(List<Sequence> sequences, int l, int d)
         {
             Sequence best = null;
             var bestValue = int.MaxValue;
@@ -30,7 +30,7 @@ namespace PlantedMotifSearch
                         if (newC == current)
                             break;
                         current = newC;
-                        
+
                         Console.WriteLine("small one:" + value(current, sequences) + " : " + subValueSqr(current, sequences));
                     }
 
@@ -52,7 +52,7 @@ namespace PlantedMotifSearch
                 // return (current, new int[1]);
             }
 
-            return (best, new int[1]);
+            return best;
         }
 
 

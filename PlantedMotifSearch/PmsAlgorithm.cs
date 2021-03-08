@@ -4,6 +4,6 @@ namespace PlantedMotifSearch
 {
     public interface PmsAlgorithm
     {
-        (Sequence, int[]) Search(List<Sequence> sequences, int l, int d);
+        Sequence Search(List<Sequence> sequences, int l, int d);
     }
 }
