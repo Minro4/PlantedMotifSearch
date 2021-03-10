@@ -118,11 +118,11 @@ namespace PlantedMotifSearch.SequenceGeneration
             return previousSequences;
         }
 
-        public IList<Neighbour> NeighboursOfDist2(Sequence sequence, int d)
+        public IList<Neighbour> NeighboursOfDist2(Neighbour sequence, int d)
         {
             var n = new List<Neighbour>();
 
-            var combs = Utils.Combination(d, sequence.Len);
+            var combs = Utils.Combination(d, sequence.original.Len);
 
             foreach (var combination in combs)
             {
@@ -132,9 +132,9 @@ namespace PlantedMotifSearch.SequenceGeneration
             return n;
         }
 
-        private IEnumerable<Neighbour> SequencesWithDifferingCharAtIdx2(Sequence sequence, IEnumerable<int> indices)
+        private IEnumerable<Neighbour> SequencesWithDifferingCharAtIdx2(Neighbour sequence, IEnumerable<int> indices)
         {
-            var previousSequences = new List<Neighbour> {new Neighbour(sequence)};
+            var previousSequences = new List<Neighbour> {sequence};
 
             foreach (var index in indices)
             {
@@ -150,7 +150,7 @@ namespace PlantedMotifSearch.SequenceGeneration
 
 
                         var newLetter = _alphabet[(currentCharIdx + l) % _alphabet.Count];
-                        s.differences.Add(new Difference(index, newLetter));
+                        s[index] = newLetter;
 
                         newSequences.Add(s);
                     }

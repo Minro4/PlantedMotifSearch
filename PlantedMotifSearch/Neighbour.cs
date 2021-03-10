@@ -5,12 +5,23 @@ namespace PlantedMotifSearch
     public struct Neighbour
     {
         public Sequence original { get; private set; }
-        public List<Difference> differences { get; private set; }
+        public IDictionary<int, char> differences { get; private set; }
 
-        public Neighbour(Sequence original, List<Difference> differences = null)
+        public char this[int i]
+        {
+            get
+            {
+                char value;
+                if (differences.TryGetValue(i, out value)) return value;
+                else return original[i];
+            }
+            set => differences[i] = value;
+        }
+
+        public Neighbour(Sequence original, SortedDictionary<int, char> differences = null)
         {
             this.original = original;
-            this.differences = differences ?? new List<Difference>();
+            this.differences = differences ?? new SortedDictionary<int, char>();
         }
 
         public Sequence toSequence()
@@ -18,7 +29,7 @@ namespace PlantedMotifSearch
             var s = original.Clone();
             foreach (var dif in differences)
             {
-                s[dif.index] = dif.value;
+                s[dif.Key] = dif.Value;
             }
 
             return s;
@@ -26,7 +37,7 @@ namespace PlantedMotifSearch
 
         public Neighbour Clone()
         {
-            return new Neighbour(original, new List<Difference>(differences));
+            return new Neighbour(original, new SortedDictionary<int, char>(differences));
         }
     }
 

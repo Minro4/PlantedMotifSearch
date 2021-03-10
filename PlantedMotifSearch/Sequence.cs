@@ -127,8 +127,8 @@ namespace PlantedMotifSearch
                 {
                     foreach (var difference in motif.differences)
                     {
-                        d += this[index + difference.index] == difference.value ? 0 : 1;
-                        d -= this[index + difference.index] == motif.original[difference.index] ? 0 : 1;
+                        d += this[index + difference.Key] == difference.Value ? 0 : 1;
+                        d -= this[index + difference.Key] == motif.original[difference.Key] ? 0 : 1;
                     }
 
                     return d;
