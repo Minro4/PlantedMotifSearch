@@ -4,15 +4,16 @@ namespace PlantedMotifSearch
 {
     public struct HillMotif
     {
-        public Sequence Sequence;
+        public Neighbour Sequence;
         public double dist;
 
 
-        public HillMotif(Sequence sequence, double dist)
+        public HillMotif(Neighbour sequence, double dist)
         {
             Sequence = sequence;
             this.dist = dist;
         }
+
         /*
         int IComparable.CompareTo(object obj)
         {

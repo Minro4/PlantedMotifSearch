@@ -6,6 +6,8 @@ namespace PlantedMotifSearch
 {
     public class Sequence
     {
+        private Dictionary<Sequence, int[]> distanceCache = new();
+
         private char[] s;
         private int startIdx;
         private int len;
@@ -110,6 +112,41 @@ namespace PlantedMotifSearch
 
             return bestDist;
         }
+
+        public int MotifHammingDist(Neighbour motif)
+        {
+            if (motif.original.Len > Len)
+            {
+                throw new Exception("Motif cannot be longer than sequence");
+            }
+
+            if (distanceCache.ContainsKey(motif.original))
+            {
+                var distances = distanceCache[motif.original];
+                return new List<int>(distances).Select((d, index) =>
+                {
+                    foreach (var difference in motif.differences)
+                    {
+                        d += this[index + difference.index] == difference.value ? 0 : 1;
+                        d -= this[index + difference.index] == motif.original[difference.index] ? 0 : 1;
+                    }
+
+                    return d;
+                }).Min();
+            }
+
+
+            var cacheDist = new int[Len - motif.original.Len + 1];
+            for (int i = 0; i < cacheDist.Length; i++)
+            {
+                cacheDist[i] = HammingDist(motif.original, i);
+            }
+
+            distanceCache[motif.original] = cacheDist;
+
+            return MotifHammingDist(motif);
+        }
+
 
         public Sequence Clone()
         {

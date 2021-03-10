@@ -14,53 +14,20 @@ namespace PlantedMotifSearch
             _generator = generator;
         }
 
-        public bool SearchOnce(List<Sequence> sequences, int l, int d)
-        {
-            var mers = sequences[0].SubSequence(0, l);
-
-            var res = ClimbSingleChild(new HillMotif(mers, value(mers, sequences)), sequences, d);
-
-            return (int) res.dist <= d;
-        }
-
         public Sequence Search(List<Sequence> sequences, int l, int d)
         {
             return AdaptiveSearch(sequences, l, d);
-            /*
-            var best = new HillMotif(null, double.MaxValue);
-
-            foreach (var sequence in sequences[0].Mers(l))
-            {
-                var res = Climb(sequence, sequences, d, 1);
-
-                Console.WriteLine(res.dist);
-
-                if (res.dist < best.dist)
-                {
-                    best = res;
-                }
-
-                if ((int) best.dist <= d)
-                    break;
-
-
-                // return (current, new int[1]);
-            }
-
-            Console.WriteLine("BEST ONE:" + best.Sequence.MotifDistance(sequences));
-            return best.Sequence;*/
         }
 
-        //TODO fix bests pourrait etre mieux opt
-        public Sequence AdaptiveSearch(List<Sequence> sequences, int l, int d, int upTo = 2)
+        public Sequence AdaptiveSearch0(List<Sequence> sequences, int l, int d, int upTo = 2)
         {
             var bests = new List<HillMotif>();
             foreach (var sequence in sequences[0].Mers(l))
             {
-                var m = new HillMotif(sequence, value(sequence, sequences));
+                var m = new HillMotif(new Neighbour(sequence), value(sequence, sequences));
                 bests.Add(m);
                 if ((int) m.dist <= d)
-                    return m.Sequence;
+                    return m.Sequence.original;
             }
 
             int keep = bests.Count / 20;
@@ -71,154 +38,90 @@ namespace PlantedMotifSearch
             {
                 for (int j = 0; j < keep; j++)
                 {
-                    var res = ClimbOfDist(bests[j], sequences, d, i);
+                    var res = ClimbOfDist0(bests[j], sequences, d, i);
                     bests.Add(res);
 
                     if ((int) res.dist <= d)
-                        return res.Sequence;
+                        return res.Sequence.original;
                 }
 
                 bests = bests.OrderBy((x) => x.dist).ToList();
                 keep /= 39;
             }
 
-            return bests[0].Sequence;
+            return bests[0].Sequence.original;
         }
 
-        public List<Sequence> Test(List<Sequence> sequences, int l, int d)
+        //TODO fix bests pourrait etre mieux opt
+        public Sequence AdaptiveSearch(List<Sequence> sequences, int l, int d, int upTo = 2)
         {
-            var motifs = new List<Sequence>();
-
+            var bests = new List<HillMotif>();
             foreach (var sequence in sequences[0].Mers(l))
             {
-                var res = Climb2(sequence, sequences, d);
-
-                Console.WriteLine(res.dist);
-                Console.WriteLine(sequence.toString());
-                Console.WriteLine(res.Sequence.toString());
-
-                if ((int) res.dist <= d)
-                    motifs.Add(res.Sequence);
-
-
-                // return (current, new int[1]);
+                var m = new HillMotif(new Neighbour(sequence), value(sequence, sequences));
+                bests.Add(m);
+                if ((int) m.dist <= d)
+                    return m.Sequence.toSequence();
             }
 
-            return motifs;
-        }
+            int keep = bests.Count / 20;
 
-
-        public HillMotif Climb(Sequence motif, List<Sequence> sequences, int d, int childExploration)
-        {
-            var l = new List<HillMotif>();
-            l.Add(new HillMotif(motif, value(motif, sequences)));
-            foreach (var s in _generator.Neighbours(motif, 1))
-            {
-                l.Add(new HillMotif(s, value(s, sequences)));
-            }
-
-            l = l.OrderBy((x) => x.dist).ToList();
-
-            var best = new HillMotif(motif, value(motif, sequences));
-
-            for (int i = 0; i <= childExploration; i++)
-            {
-                if ((int) l[i].dist <= d)
-                    return l[i];
-
-                if (l[i].Sequence != motif)
-                {
-                    var res = Climb(l[i].Sequence, sequences, d, childExploration / 2);
-
-                    if (res.dist < best.dist)
-                    {
-                        best = res;
-                    }
-                }
-            }
-
-            return best;
-        }
-
-        public HillMotif Climb2(Sequence motif, List<Sequence> sequences, int maxDepth)
-        {
-            if (maxDepth == 0)
-                return new HillMotif(motif, value(motif, sequences));
-
-            var best = new HillMotif(motif, value(motif, sequences));
-            foreach (var s in _generator.Neighbours(motif, 1))
-            {
-                var n = new HillMotif(s, value(s, sequences));
-
-                if (n.dist < best.dist)
-                {
-                    best = n;
-                }
-            }
-
-            return Climb2(best.Sequence, sequences, maxDepth - 1);
-        }
-
-        public HillMotif ClimbSingleChild(HillMotif motif, List<Sequence> sequences, int d)
-        {
-            var best = motif;
-
-            if ((int) best.dist <= d)
-                return best;
-
-            foreach (var s in _generator.Neighbours(motif.Sequence, 1))
-            {
-                var n = new HillMotif(s, value(s, sequences));
-
-                if (n.dist < best.dist)
-                {
-                    best = n;
-
-                    if ((int) best.dist <= d)
-                        return best;
-                }
-            }
-
-            if (best.Sequence == motif.Sequence)
-                return motif;
-
-            return ClimbSingleChild(best, sequences, d);
-        }
-
-        //TODO faire le meme chose mais juste faire le adaptive climb pour les x meilleurs
-        public HillMotif AdaptiveClimb(Sequence motif, List<Sequence> sequences, int upTo, int d)
-        {
-            var best = new HillMotif(motif, value(motif, sequences));
-
-
-            if ((int) best.dist <= d)
-                return best;
+            bests = bests.OrderBy((x) => x.dist).ToList();
 
             for (int i = 1; i <= upTo; i++)
             {
-                HillMotif newBest = best;
-                do
+                for (int j = 0; j < keep; j++)
                 {
-                    best = newBest;
-                    foreach (var s in _generator.NeighboursOfDist(best.Sequence, i))
-                    {
-                        var n = new HillMotif(s, value(s, sequences));
+                    // var res0 = ClimbOfDist0(bests[j], sequences, d, i);
+                    var res = ClimbOfDist(bests[j], sequences, d, i);
+                    bests.Add(res);
 
-                        if (n.dist < newBest.dist)
-                        {
-                            newBest = n;
+                    if ((int) res.dist <= d)
+                        return res.Sequence.toSequence();
+                }
 
-                            if ((int) newBest.dist <= d)
-                                return newBest;
-                        }
-                    }
-                } while (newBest.Sequence != best.Sequence);
+                bests = bests.OrderBy((x) => x.dist).ToList();
+                keep /= 39;
             }
+
+            return bests[0].Sequence.toSequence();
+        }
+
+        public HillMotif ClimbOfDist0(HillMotif motif, List<Sequence> sequences, int d, int dist)
+        {
+            var best = motif;
+
+
+            if ((int) best.dist <= d)
+                return best;
+
+
+            HillMotif newBest = best;
+            bool changed;
+            do
+            {
+                changed = false;
+                best = newBest;
+
+                foreach (var s in _generator.NeighboursOfDist(best.Sequence.toSequence(), dist))
+                {
+                    var n = new HillMotif(new Neighbour(s), value(s, sequences));
+
+                    if (n.dist < newBest.dist)
+                    {
+                        newBest = n;
+                        changed = true;
+
+                        if ((int) newBest.dist <= d)
+                            return newBest;
+                    }
+                }
+            } while (changed);
+
 
             return best;
         }
 
-        //TODO le hamming dist pour les voisins est la même chose à 99% donc pourrait être mega optimisé!!
         public HillMotif ClimbOfDist(HillMotif motif, List<Sequence> sequences, int d, int dist)
         {
             var best = motif;
@@ -229,23 +132,26 @@ namespace PlantedMotifSearch
 
 
             HillMotif newBest = best;
+            bool changed;
             do
             {
+                changed = false;
                 best = newBest;
 
-                foreach (var s in _generator.NeighboursOfDist(best.Sequence, dist))
+                foreach (var s in _generator.NeighboursOfDist2(best.Sequence.toSequence(), dist))
                 {
-                    var n = new HillMotif(s, value(s, sequences));
+                    var n = new HillMotif(s, neighbourValue(s, sequences));
 
                     if (n.dist < newBest.dist)
                     {
                         newBest = n;
+                        changed = true;
 
                         if ((int) newBest.dist <= d)
                             return newBest;
                     }
                 }
-            } while (newBest.Sequence != best.Sequence);
+            } while (changed);
 
 
             return best;
@@ -253,6 +159,14 @@ namespace PlantedMotifSearch
 
 
         private double value(Sequence motif, List<Sequence> sequences)
+        {
+            var dists = sequences.Select(s => s.MotifHammingDist(motif));
+            var intP = dists.Max();
+            var dP = dists.Select(v => v * v).Sum();
+            return intP + ((double) dP / 20000);
+        }
+
+        private double neighbourValue(Neighbour motif, List<Sequence> sequences)
         {
             var dists = sequences.Select(s => s.MotifHammingDist(motif));
             var intP = dists.Max();

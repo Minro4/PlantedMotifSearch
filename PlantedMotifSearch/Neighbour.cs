@@ -2,7 +2,7 @@
 
 namespace PlantedMotifSearch
 {
-    public class Neighbour
+    public struct Neighbour
     {
         public Sequence original { get; private set; }
         public List<Difference> differences { get; private set; }
@@ -13,9 +13,20 @@ namespace PlantedMotifSearch
             this.differences = differences ?? new List<Difference>();
         }
 
+        public Sequence toSequence()
+        {
+            var s = original.Clone();
+            foreach (var dif in differences)
+            {
+                s[dif.index] = dif.value;
+            }
+
+            return s;
+        }
+
         public Neighbour Clone()
         {
-            return new Neighbour(original, differences);
+            return new Neighbour(original, new List<Difference>(differences));
         }
     }
 

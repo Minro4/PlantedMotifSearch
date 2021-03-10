@@ -12,8 +12,8 @@ namespace PlantedMotifSearch
         static void Main(string[] args)
         {
             var gen = new SequenceGenerator(alphabet);
-            // new Accuracy(gen, new AdaptiveHillClimbing(gen)).TestMultiple(13, 50, 4, 25, 10, "test.xlsx");
-            var (a, b) = new Accuracy(gen, new AdaptiveHillClimbing(gen)).Test(26, 11, 10);
+            //new Accuracy(gen, new AdaptiveHillClimbing(gen)).TestMultiple(13, 50, 4, 25, 10, "test.xlsx");
+            var (a, b) = new Accuracy(gen, new AdaptiveHillClimbing(gen)).Test(26, 11, 5);
             Console.WriteLine("success: " + a);
             Console.WriteLine("time: " + b);
             /*  (var motif, var s) = gen.PlantedMotif(l, d, 20, 600);

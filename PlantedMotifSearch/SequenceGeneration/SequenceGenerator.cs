@@ -25,7 +25,7 @@ namespace PlantedMotifSearch.SequenceGeneration
                 var seq = RandomSequence(seqLen);
 
                 //insertMotif
-                var genD = rnd.Next(d / 2, d + 1);
+                var genD = rnd.Next(d + 1);
                 //Console.WriteLine(genD);
                 var rndMotif = RandomNeighbourOfDist(motif, genD);
                 var startIdx = /*i == 0 ? 0 :*/ rnd.Next(seqLen - l);
