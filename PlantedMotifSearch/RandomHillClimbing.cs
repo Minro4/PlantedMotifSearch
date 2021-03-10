@@ -5,11 +5,11 @@ using PlantedMotifSearch.SequenceGeneration;
 
 namespace PlantedMotifSearch
 {
-    public class HillClimbing : PmsAlgorithm
+    public class RandomHillClimbing : PmsAlgorithm
     {
         private SequenceGenerator _generator;
 
-        public HillClimbing(SequenceGenerator generator)
+        public RandomHillClimbing(SequenceGenerator generator)
         {
             _generator = generator;
         }

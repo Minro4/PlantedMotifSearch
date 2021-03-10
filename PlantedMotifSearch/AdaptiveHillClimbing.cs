@@ -5,11 +5,11 @@ using PlantedMotifSearch.SequenceGeneration;
 
 namespace PlantedMotifSearch
 {
-    public class HillClimbing2 : PmsAlgorithm
+    public class AdaptiveHillClimbing : PmsAlgorithm
     {
         private SequenceGenerator _generator;
 
-        public HillClimbing2(SequenceGenerator generator)
+        public AdaptiveHillClimbing(SequenceGenerator generator)
         {
             _generator = generator;
         }
@@ -25,6 +25,8 @@ namespace PlantedMotifSearch
 
         public Sequence Search(List<Sequence> sequences, int l, int d)
         {
+            return AdaptiveSearch(sequences, l, d);
+            /*
             var best = new HillMotif(null, double.MaxValue);
 
             foreach (var sequence in sequences[0].Mers(l))
@@ -46,19 +48,22 @@ namespace PlantedMotifSearch
             }
 
             Console.WriteLine("BEST ONE:" + best.Sequence.MotifDistance(sequences));
-            return best.Sequence;
+            return best.Sequence;*/
         }
 
         //TODO fix bests pourrait etre mieux opt
-        public Sequence AdaptiveSearch(List<Sequence> sequences, int l, int d, int upTo)
+        public Sequence AdaptiveSearch(List<Sequence> sequences, int l, int d, int upTo = 2)
         {
-            int keep = sequences.Count;
-
             var bests = new List<HillMotif>();
             foreach (var sequence in sequences[0].Mers(l))
             {
-                bests.Add(new HillMotif(sequence, value(sequence, sequences)));
+                var m = new HillMotif(sequence, value(sequence, sequences));
+                bests.Add(m);
+                if ((int) m.dist <= d)
+                    return m.Sequence;
             }
+
+            int keep = bests.Count / 20;
 
             bests = bests.OrderBy((x) => x.dist).ToList();
 
@@ -66,7 +71,7 @@ namespace PlantedMotifSearch
             {
                 for (int j = 0; j < keep; j++)
                 {
-                    var res = ClimbOfDist(bests[j], sequences, d, 1);
+                    var res = ClimbOfDist(bests[j], sequences, d, i);
                     bests.Add(res);
 
                     if ((int) res.dist <= d)
@@ -74,7 +79,7 @@ namespace PlantedMotifSearch
                 }
 
                 bests = bests.OrderBy((x) => x.dist).ToList();
-                keep /= 4;
+                keep /= 39;
             }
 
             return bests[0].Sequence;
@@ -213,7 +218,8 @@ namespace PlantedMotifSearch
             return best;
         }
 
-        public HillMotif ClimbOfDist(HillMotif motif, List<Sequence> sequences, int dist, int d)
+        //TODO le hamming dist pour les voisins est la même chose à 99% donc pourrait être mega optimisé!!
+        public HillMotif ClimbOfDist(HillMotif motif, List<Sequence> sequences, int d, int dist)
         {
             var best = motif;
 
@@ -226,6 +232,7 @@ namespace PlantedMotifSearch
             do
             {
                 best = newBest;
+
                 foreach (var s in _generator.NeighboursOfDist(best.Sequence, dist))
                 {
                     var n = new HillMotif(s, value(s, sequences));

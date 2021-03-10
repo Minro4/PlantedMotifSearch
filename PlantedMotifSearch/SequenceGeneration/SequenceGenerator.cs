@@ -25,10 +25,10 @@ namespace PlantedMotifSearch.SequenceGeneration
                 var seq = RandomSequence(seqLen);
 
                 //insertMotif
-                var genD = rnd.Next(d + 1);
+                var genD = rnd.Next(d / 2, d + 1);
                 //Console.WriteLine(genD);
                 var rndMotif = RandomNeighbourOfDist(motif, genD);
-                var startIdx = i == 0 ? 0 : rnd.Next(seqLen - l);
+                var startIdx = /*i == 0 ? 0 :*/ rnd.Next(seqLen - l);
                 seq.SetSequence(rndMotif, startIdx);
 
                 seqs.Add(seq);
@@ -117,6 +117,51 @@ namespace PlantedMotifSearch.SequenceGeneration
 
             return previousSequences;
         }
+
+        public IList<Neighbour> NeighboursOfDist2(Sequence sequence, int d)
+        {
+            var n = new List<Neighbour>();
+
+            var combs = Utils.Combination(d, sequence.Len);
+
+            foreach (var combination in combs)
+            {
+                n.AddRange(SequencesWithDifferingCharAtIdx2(sequence, combination));
+            }
+
+            return n;
+        }
+
+        private IEnumerable<Neighbour> SequencesWithDifferingCharAtIdx2(Sequence sequence, IEnumerable<int> indices)
+        {
+            var previousSequences = new List<Neighbour> {new Neighbour(sequence)};
+
+            foreach (var index in indices)
+            {
+                var newSequences = new List<Neighbour>();
+
+                var currentCharIdx = _alphabet.FindIndex((c) => c == sequence[index]);
+
+                foreach (var seq in previousSequences)
+                {
+                    for (int l = 1; l < _alphabet.Count; l++)
+                    {
+                        var s = seq.Clone();
+
+
+                        var newLetter = _alphabet[(currentCharIdx + l) % _alphabet.Count];
+                        s.differences.Add(new Difference(index, newLetter));
+
+                        newSequences.Add(s);
+                    }
+                }
+
+                previousSequences = newSequences;
+            }
+
+            return previousSequences;
+        }
+
 
         //TODO le random est poche
         public Sequence RandomNeighbour(Sequence sequence, int d)

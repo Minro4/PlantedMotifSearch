@@ -10,7 +10,7 @@ namespace PlantedMotifSearch
         private PmsAlgorithm algorithm;
         private SequenceGenerator generator;
 
-        public Accuracy(SequenceGenerator generator)
+        public Accuracy(SequenceGenerator generator, PmsAlgorithm algorithm)
         {
             this.algorithm = algorithm;
             this.generator = generator;
@@ -54,7 +54,6 @@ namespace PlantedMotifSearch
             var successCount = 0;
             long avgTime = 0;
 
-            var a = new HillClimbing2(generator);
             for (int i = 0; i < sampleSize; i++)
             {
                 Console.WriteLine(i);
@@ -62,10 +61,12 @@ namespace PlantedMotifSearch
 
                 var watch = new Stopwatch();
                 watch.Start();
-                bool resp = a.SearchOnce(s, l, d);
+                var resp = algorithm.Search(s, l, d);
                 watch.Stop();
                 avgTime += watch.ElapsedMilliseconds / sampleSize;
-                successCount += resp ? 1 : 0;
+
+                if (resp.MotifDistance(s) <= d)
+                    successCount++;
             }
 
             return (successCount, avgTime);
