@@ -90,31 +90,30 @@ namespace PlantedMotifSearch
             return best;
         }
 
-
-        private double value(Sequence motif, List<Sequence> sequences)
+        /***
+         * Returns the distance for a motif in a list of sequences
+         * The integer part of the value is the maximum distance of the best motif match in all sequences.
+         * The fractional part is the sum of squared distances for the best motif match in all sequences.
+         */
+        private static double value(Sequence motif, List<Sequence> sequences)
         {
             var dists = sequences.Select(s => s.MotifHammingDist(motif));
             var intP = dists.Max();
             var dP = dists.Select(v => v * v).Sum();
             return intP + ((double) dP / 20000);
         }
-
-        private double neighbourValue(Neighbour motif, List<Sequence> sequences)
+        
+        /***
+          * Returns the distance for a motif in a list of sequences
+          * The integer part of the value is the maximum distance of the best motif match in all sequences.
+          * The fractional part is the sum of squared distances for the best motif match in all sequences.
+          */
+        private static double neighbourValue(Neighbour motif, List<Sequence> sequences)
         {
             var dists = sequences.Select(s => s.MotifHammingDist(motif));
             var intP = dists.Max();
             var dP = dists.Select(v => v * v).Sum();
             return intP + ((double) dP / 20000);
-        }
-
-        private int subValue(Sequence motif, List<Sequence> sequences)
-        {
-            return sequences.Select(s => s.MotifHammingDist(motif)).Sum();
-        }
-
-        private int subValueSqr(Sequence motif, List<Sequence> sequences)
-        {
-            return sequences.Select(s => s.MotifHammingDist(motif)).Select(v => v * v).Sum();
         }
     }
 }

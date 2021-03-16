@@ -2,6 +2,10 @@
 
 namespace PlantedMotifSearch
 {
+    /***
+     * Sequence neighbour
+     * is used to optimise hamming dist calculations because once we calculate the original sequence distance, we only need to calculate the differences.
+     */
     public struct Neighbour
     {
         public Sequence original { get; private set; }

@@ -5,12 +5,12 @@ using PlantedMotifSearch.SequenceGeneration;
 
 namespace PlantedMotifSearch
 {
-    public class Accuracy
+    public class PmsAlgoTester
     {
         private PmsAlgorithm algorithm;
         private SequenceGenerator generator;
 
-        public Accuracy(SequenceGenerator generator, PmsAlgorithm algorithm)
+        public PmsAlgoTester(SequenceGenerator generator, PmsAlgorithm algorithm)
         {
             this.algorithm = algorithm;
             this.generator = generator;

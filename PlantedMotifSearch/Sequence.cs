@@ -52,15 +52,6 @@ namespace PlantedMotifSearch
                 throw new Exception("Specified length is too long");
 
             return new Sequence(this.s, this.startIdx + startIdx, len);
-
-            /*
-                    var sub = new Sequence(len);
-                    for (int i = 0; i < len; i++)
-                    {
-                        sub[i] = this[i + startIdx];
-                    }
-        
-                    return sub;*/
         }
 
         public IEnumerable<(Sequence, List<Sequence>)> CommonMers(List<Sequence> otherMers, int l, int d)

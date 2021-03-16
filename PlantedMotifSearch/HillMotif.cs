@@ -2,6 +2,9 @@
 
 namespace PlantedMotifSearch
 {
+    /***
+     * Motif candidate and its distance
+     */
     public struct HillMotif
     {
         public Neighbour Sequence;
