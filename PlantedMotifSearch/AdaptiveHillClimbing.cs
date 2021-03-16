@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using PlantedMotifSearch.SequenceGeneration;
 
 namespace PlantedMotifSearch
@@ -16,45 +17,50 @@ namespace PlantedMotifSearch
 
         public Sequence Search(List<Sequence> sequences, int l, int d)
         {
-            return AdaptiveSearch(sequences, l, d);
+            var keep = new[] {10};
+            return AdaptiveSearch(sequences, l, d, keep);
         }
-        
+
 
         //TODO fix bests pourrait etre mieux opt
-        public Sequence AdaptiveSearch(List<Sequence> sequences, int l, int d, int upTo = 2)
+        public Sequence AdaptiveSearch(List<Sequence> sequences, int l, int d, int[] keep)
         {
-            var bests = new List<HillMotif>();
-            foreach (var sequence in sequences[0].Mers(l))
+            foreach (var baseCandidate in sequences)
             {
-                var m = new HillMotif(new Neighbour(sequence), value(sequence, sequences));
-                bests.Add(m);
-                if ((int) m.dist <= d)
-                    return m.Sequence.toSequence();
-            }
+                var candidates = baseCandidate.Mers(l).AsParallel().Select((sequence, i) =>
+                    new HillMotif(new Neighbour(sequence), value(sequence, sequences))).ToList();
 
-            int keep = bests.Count / 20;
-
-            bests = bests.OrderBy((x) => x.dist).ToList();
-
-            for (int i = 1; i <= upTo; i++)
-            {
-                for (int j = 0; j < keep; j++)
+                var instantFind = candidates.Where((motif => (int) motif.dist <= d));
+                if (instantFind.Any())
                 {
-                    // var res0 = ClimbOfDist0(bests[j], sequences, d, i);
-                    var res = ClimbOfDist(bests[j], sequences, d, i);
-                    bests.Add(res);
-
-                    if ((int) res.dist <= d)
-                        return res.Sequence.toSequence();
+                    Console.WriteLine("instant find");
+                    return instantFind.First().Sequence.toSequence();
                 }
 
-                bests = bests.OrderBy((x) => x.dist).ToList();
-                keep /= 39;
+                candidates = candidates.OrderBy((x) => x.dist).ToList();
+
+                for (int i = 0; i < keep.Length; i++)
+                {
+                    for (int j = 0; j < keep[i] && j < candidates.Count; j++)
+                    {
+                        var res = ClimbOfDist(candidates[j], sequences, d, i + 1);
+                        candidates.Add(res);
+
+                        if ((int) res.dist <= d)
+                        {
+                            Console.WriteLine("found on: " + j);
+                            return res.Sequence.toSequence();
+                        }
+                    }
+
+                    candidates = candidates.OrderBy((x) => x.dist).ToList();
+                }
             }
 
-            return bests[0].Sequence.toSequence();
+
+            return sequences[0].SubSequence(0, l);
         }
-        
+
         public HillMotif ClimbOfDist(HillMotif motif, List<Sequence> sequences, int d, int dist)
         {
             var best = motif;
@@ -97,12 +103,12 @@ namespace PlantedMotifSearch
          */
         private static double value(Sequence motif, List<Sequence> sequences)
         {
-            var dists = sequences.Select(s => s.MotifHammingDist(motif));
+            var dists = sequences.AsParallel().Select(s => s.MotifHammingDist(motif));
             var intP = dists.Max();
             var dP = dists.Select(v => v * v).Sum();
             return intP + ((double) dP / 20000);
         }
-        
+
         /***
           * Returns the distance for a motif in a list of sequences
           * The integer part of the value is the maximum distance of the best motif match in all sequences.
@@ -110,7 +116,7 @@ namespace PlantedMotifSearch
           */
         private static double neighbourValue(Neighbour motif, List<Sequence> sequences)
         {
-            var dists = sequences.Select(s => s.MotifHammingDist(motif));
+            var dists = sequences.AsParallel().Select(s => s.MotifHammingDist(motif));
             var intP = dists.Max();
             var dP = dists.Select(v => v * v).Sum();
             return intP + ((double) dP / 20000);

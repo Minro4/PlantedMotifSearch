@@ -9,37 +9,35 @@ namespace PlantedMotifSearch
 
         static void Main(string[] args)
         {
-            Algo();
-            //TestOnce();
-            //TestMultiple();
+            var gen = new SequenceGenerator(alphabet);
+            PmsAlgorithm algo = new AdaptiveHillClimbing(gen);
+
+            //RunAlgo(algo, gen);
+            TestOnce(algo, gen, 26, 11, 100);
+            //TestMultiple(algo, gen);
         }
 
-        static void Algo(int l = 26, int d = 11)
+        static void RunAlgo(PmsAlgorithm algo, SequenceGenerator gen, int l = 26, int d = 11)
         {
-            var gen = new SequenceGenerator(alphabet);
-
             (var motif, var s) = gen.PlantedMotif(l, d, 20, 600);
 
-
-            var foundMotif = new AdaptiveHillClimbing(gen).AdaptiveSearch(s, l, d);
+            var foundMotif = new AdaptiveHillClimbing(gen).Search(s, l, d);
 
             Console.WriteLine("Motif: " + motif.toString());
             Console.WriteLine("Found motif: " + foundMotif.toString());
         }
 
-        static void TestOnce(int l = 26, int d = 11, int sampleSize = 10)
+        static void TestOnce(PmsAlgorithm algo, SequenceGenerator gen, int l = 26, int d = 11, int sampleSize = 10)
         {
-            var gen = new SequenceGenerator(alphabet);
-            var (a, b) = new PmsAlgoTester(gen, new AdaptiveHillClimbing(gen)).Test(l, d, sampleSize);
+            var (a, b) = new PmsAlgoTester(gen, algo).Test(l, d, sampleSize);
             Console.WriteLine("success: " + a);
             Console.WriteLine("time: " + b);
         }
 
         //Writes to an excel sheet
-        static void TestMultiple()
+        static void TestMultiple(PmsAlgorithm algo, SequenceGenerator gen, string fileName = "test.xlsx")
         {
-            var gen = new SequenceGenerator(alphabet);
-            new PmsAlgoTester(gen, new AdaptiveHillClimbing(gen)).TestMultiple(13, 50, 4, 25, 10, "test.xlsx");
+            new PmsAlgoTester(gen, algo).TestMultiple(13, 50, 4, 25, 10, fileName);
         }
     }
 }
