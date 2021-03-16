@@ -9,15 +9,17 @@ namespace PlantedMotifSearch
     public class AdaptiveHillClimbing : PmsAlgorithm
     {
         private SequenceGenerator _generator;
+        private int[] keep = {5, 1};
 
-        public AdaptiveHillClimbing(SequenceGenerator generator)
+        public AdaptiveHillClimbing(SequenceGenerator generator, int[] keep = null)
         {
             _generator = generator;
+            if (keep != null)
+                this.keep = keep;
         }
 
         public Sequence Search(List<Sequence> sequences, int l, int d)
         {
-            var keep = new[] {10};
             return AdaptiveSearch(sequences, l, d, keep);
         }
 
@@ -27,14 +29,14 @@ namespace PlantedMotifSearch
         {
             foreach (var baseCandidate in sequences)
             {
-                var candidates = baseCandidate.Mers(l).AsParallel().Select((sequence, i) =>
-                    new HillMotif(new Neighbour(sequence), value(sequence, sequences))).ToList();
-
-                var instantFind = candidates.Where((motif => (int) motif.dist <= d));
-                if (instantFind.Any())
+                Console.WriteLine("test candidate");
+                var candidates = new List<HillMotif>();
+                foreach (var sequence in baseCandidate.Mers(l))
                 {
-                    Console.WriteLine("instant find");
-                    return instantFind.First().Sequence.toSequence();
+                    var m = new HillMotif(new Neighbour(sequence), value(sequence, sequences));
+                    candidates.Add(m);
+                    if ((int) m.dist <= d)
+                        return m.Sequence.toSequence();
                 }
 
                 candidates = candidates.OrderBy((x) => x.dist).ToList();
@@ -58,7 +60,7 @@ namespace PlantedMotifSearch
             }
 
 
-            return sequences[0].SubSequence(0, l);
+            return null;
         }
 
         public HillMotif ClimbOfDist(HillMotif motif, List<Sequence> sequences, int d, int dist)
@@ -77,9 +79,9 @@ namespace PlantedMotifSearch
                 changed = false;
                 best = newBest;
 
-                foreach (var s in _generator.NeighboursOfDist2(best.Sequence, dist))
+                foreach (var s in _generator.NeighboursOfDist(best.Sequence, dist))
                 {
-                    var n = new HillMotif(s, neighbourValue(s, sequences));
+                    var n = new HillMotif(s, value(s.toSequence(), sequences));
 
                     if (n.dist < newBest.dist)
                     {
@@ -102,19 +104,6 @@ namespace PlantedMotifSearch
          * The fractional part is the sum of squared distances for the best motif match in all sequences.
          */
         private static double value(Sequence motif, List<Sequence> sequences)
-        {
-            var dists = sequences.AsParallel().Select(s => s.MotifHammingDist(motif));
-            var intP = dists.Max();
-            var dP = dists.Select(v => v * v).Sum();
-            return intP + ((double) dP / 20000);
-        }
-
-        /***
-          * Returns the distance for a motif in a list of sequences
-          * The integer part of the value is the maximum distance of the best motif match in all sequences.
-          * The fractional part is the sum of squared distances for the best motif match in all sequences.
-          */
-        private static double neighbourValue(Neighbour motif, List<Sequence> sequences)
         {
             var dists = sequences.AsParallel().Select(s => s.MotifHammingDist(motif));
             var intP = dists.Max();

@@ -20,8 +20,21 @@ namespace PlantedMotifSearch
         {
             int lenL = endL - startL + 1;
             int lenD = endD - startD + 1;
-            int[,] accuracy = new int[lenL, lenD];
-            int[,] time = new int[lenL, lenD];
+            int[,] accuracy = new int[lenL + 1, lenD + 1];
+            int[,] time = new int[lenL + 1, lenD + 1];
+
+            //Add columns and row indicator
+            for (int l = 0; l < lenL; l++)
+            {
+                accuracy[l + 1, 0] = l + startL;
+                time[l + 1, 0] = l + startL;
+            }
+
+            for (int d = 0; d < lenD; d++)
+            {
+                accuracy[0, d + 1] = d + startD;
+                time[0, d + 1] = d + startD;
+            }
 
             Workbook workbook = new Workbook();
             Worksheet worksheet = workbook.Worksheets[0];
@@ -33,14 +46,14 @@ namespace PlantedMotifSearch
                     if (d + startD < l + startL)
                     {
                         var (a, t) = Test(l + startL, d + startD, sampleSize);
-                        accuracy[l, d] = a;
-                        time[l, d] = (int) t;
+                        accuracy[l + 1, d + 1] = a;
+                        time[l + 1, d + 1] = (int) t;
                     }
                 }
 
 
                 worksheet.Cells.ImportArray(accuracy, 0, 0);
-                worksheet.Cells.ImportArray(time, lenL + 1, 0);
+                worksheet.Cells.ImportArray(time, lenL + 5, 0);
                 workbook.Save(l + fileName);
             }
 
@@ -65,7 +78,8 @@ namespace PlantedMotifSearch
                 watch.Stop();
                 avgTime += watch.ElapsedMilliseconds / sampleSize;
 
-                if (resp.MotifDistance(s) <= d)
+                //if (resp.MotifDistance(s) <= d)
+                if (resp != null)
                     successCount++;
             }
 

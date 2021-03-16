@@ -12,9 +12,9 @@ namespace PlantedMotifSearch
             var gen = new SequenceGenerator(alphabet);
             PmsAlgorithm algo = new AdaptiveHillClimbing(gen);
 
-            //RunAlgo(algo, gen);
-            TestOnce(algo, gen, 26, 11, 100);
-            //TestMultiple(algo, gen);
+            RunAlgo(algo, gen);
+            //TestOnce(algo, gen, 26, 11, 25);
+            //TestMultiple(algo, gen, "newTest.xlsx");
         }
 
         static void RunAlgo(PmsAlgorithm algo, SequenceGenerator gen, int l = 26, int d = 11)
@@ -37,7 +37,7 @@ namespace PlantedMotifSearch
         //Writes to an excel sheet
         static void TestMultiple(PmsAlgorithm algo, SequenceGenerator gen, string fileName = "test.xlsx")
         {
-            new PmsAlgoTester(gen, algo).TestMultiple(13, 50, 4, 25, 10, fileName);
+            new PmsAlgoTester(gen, algo).TestMultiple(20, 40, 8, 25, 10, fileName);
         }
     }
 }

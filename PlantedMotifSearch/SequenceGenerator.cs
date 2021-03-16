@@ -28,6 +28,7 @@ namespace PlantedMotifSearch.SequenceGeneration
                 var genD = rnd.Next(d + 1);
                 //Console.WriteLine(genD);
                 var rndMotif = RandomNeighbourOfDist(motif, genD);
+
                 var startIdx = rnd.Next(seqLen - l);
                 seq.SetSequence(rndMotif, startIdx);
 
@@ -57,9 +58,9 @@ namespace PlantedMotifSearch.SequenceGeneration
         /// <param name="sequence"></param>
         /// <param name="d"></param>
         /// <returns></returns>
-        public IList<Sequence> Neighbours(Sequence sequence, int d)
+        public IList<Neighbour> Neighbours(Neighbour sequence, int d)
         {
-            var n = new List<Sequence>();
+            var n = new List<Neighbour>();
             //n.Add(sequence);
 
             for (int dist = 1; dist <= d; dist++)
@@ -76,11 +77,11 @@ namespace PlantedMotifSearch.SequenceGeneration
         /// <param name="sequence"></param>
         /// <param name="d"></param>
         /// <returns></returns>
-        public IList<Sequence> NeighboursOfDist(Sequence sequence, int d)
+        public IList<Neighbour> NeighboursOfDist(Neighbour sequence, int d)
         {
-            var n = new List<Sequence>();
+            var n = new List<Neighbour>();
 
-            var combs = Utils.Combination(d, sequence.Len);
+            var combs = Utils.Combination(d, sequence.original.Len);
 
             foreach (var combination in combs)
             {
@@ -90,49 +91,7 @@ namespace PlantedMotifSearch.SequenceGeneration
             return n;
         }
 
-        private IEnumerable<Sequence> SequencesWithDifferingCharAtIdx(Sequence sequence, IEnumerable<int> indices)
-        {
-            var previousSequences = new List<Sequence> {sequence};
-
-            foreach (var index in indices)
-            {
-                var newSequences = new List<Sequence>();
-
-                var currentCharIdx = _alphabet.FindIndex((c) => c == sequence[index]);
-
-                foreach (var seq in previousSequences)
-                {
-                    for (int l = 1; l < _alphabet.Count; l++)
-                    {
-                        var s = seq.Clone();
-                        newSequences.Add(s);
-
-                        var newLetter = _alphabet[(currentCharIdx + l) % _alphabet.Count];
-                        s[index] = newLetter;
-                    }
-                }
-
-                previousSequences = newSequences;
-            }
-
-            return previousSequences;
-        }
-
-        public IList<Neighbour> NeighboursOfDist2(Neighbour sequence, int d)
-        {
-            var n = new List<Neighbour>();
-
-            var combs = Utils.Combination(d, sequence.original.Len);
-
-            foreach (var combination in combs)
-            {
-                n.AddRange(SequencesWithDifferingCharAtIdx2(sequence, combination));
-            }
-
-            return n;
-        }
-
-        private IEnumerable<Neighbour> SequencesWithDifferingCharAtIdx2(Neighbour sequence, IEnumerable<int> indices)
+        private IEnumerable<Neighbour> SequencesWithDifferingCharAtIdx(Neighbour sequence, IEnumerable<int> indices)
         {
             var previousSequences = new List<Neighbour> {sequence};
 
@@ -187,7 +146,6 @@ namespace PlantedMotifSearch.SequenceGeneration
             return rndSeq;
         }
 
-        //TODO le random est poche
         public Sequence RandomNeighbourOfDist(Sequence sequence, int d)
         {
             if (d > sequence.Len)

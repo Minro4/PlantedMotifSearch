@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace PlantedMotifSearch
 {
     public class Sequence
     {
-        private Dictionary<Sequence, int[]> distanceCache = new();
-
         private char[] s;
         private int startIdx;
         private int len;
@@ -104,44 +103,15 @@ namespace PlantedMotifSearch
             return bestDist;
         }
 
-        public int MotifHammingDist(Neighbour motif)
-        {
-            if (motif.original.Len > Len)
-            {
-                throw new Exception("Motif cannot be longer than sequence");
-            }
-
-            if (distanceCache.ContainsKey(motif.original))
-            {
-                var distances = distanceCache[motif.original];
-                return new List<int>(distances).Select((d, index) =>
-                {
-                    foreach (var difference in motif.differences)
-                    {
-                        d += this[index + difference.Key] == difference.Value ? 0 : 1;
-                        d -= this[index + difference.Key] == motif.original[difference.Key] ? 0 : 1;
-                    }
-
-                    return d;
-                }).Min();
-            }
-
-
-            var cacheDist = new int[Len - motif.original.Len + 1];
-            for (int i = 0; i < cacheDist.Length; i++)
-            {
-                cacheDist[i] = HammingDist(motif.original, i);
-            }
-
-            distanceCache[motif.original] = cacheDist;
-
-            return MotifHammingDist(motif);
-        }
-
-
         public Sequence Clone()
         {
-            return new(s.Clone() as char[], startIdx, len);
+            var clonedChars = new char[Len];
+            for (int i = 0; i < Len; i++)
+            {
+                clonedChars[i] = s[i + startIdx];
+            }
+
+            return new Sequence(clonedChars);
         }
 
         public string toString()
