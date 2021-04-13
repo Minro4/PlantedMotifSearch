@@ -55,6 +55,8 @@ namespace PlantedMotifSearch
                         var (a, t) = Test(l + startL, d + startD, sampleSize);
                         accuracy[l + 1, d + 1] = a;
                         time[l + 1, d + 1] = (int) t;
+
+                        Console.WriteLine($"Done L: {l}; D: {d}");
                     }
                 }
 
@@ -76,7 +78,7 @@ namespace PlantedMotifSearch
 
             for (int i = 0; i < sampleSize; i++)
             {
-                Console.WriteLine(i);
+                //Console.WriteLine(i);
                 var (motif, s) = generator.PlantedMotif(l, d, nbrSequences, nbrCharacters);
 
                 var watch = new Stopwatch();

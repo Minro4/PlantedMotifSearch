@@ -29,7 +29,7 @@ namespace PlantedMotifSearch
         {
             foreach (var baseCandidate in sequences)
             {
-                Console.WriteLine("test candidate");
+                //Console.WriteLine("test candidate");
                 var candidates = new List<HillMotif>();
                 foreach (var sequence in baseCandidate.Mers(l))
                 {
@@ -50,7 +50,7 @@ namespace PlantedMotifSearch
 
                         if ((int) res.dist <= d)
                         {
-                            Console.WriteLine("found on: " + j);
+                            //Console.WriteLine("found on: " + j);
                             return res.Sequence.toSequence();
                         }
                     }
