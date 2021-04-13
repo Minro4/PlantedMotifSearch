@@ -10,12 +10,12 @@ namespace PlantedMotifSearch
     {
         private SequenceGenerator _generator;
 
-        private int[] keep =
+        private double[] keep =
         {
-            5, 1
+            1, 0.01, 0.01
         };
 
-        public AdaptiveHillClimbing(SequenceGenerator generator, int[] keep = null)
+        public AdaptiveHillClimbing(SequenceGenerator generator, double[] keep = null)
         {
             _generator = generator;
             if (keep != null)
@@ -28,76 +28,66 @@ namespace PlantedMotifSearch
         }
 
 
-        //TODO fix bests pourrait etre mieux opt
-        public Sequence AdaptiveSearch(List<Sequence> sequences, int l, int d, int[] keep)
+        private Sequence AdaptiveSearch(List<Sequence> sequences, int l, int d, double[] keep)
         {
-            foreach (var baseCandidate in sequences)
+            var candidateGroups = sequences.Select(s => s.Mers(l).Select(lmers => new HillMotif(new Neighbour(lmers), value(lmers, sequences))));
+
+            foreach (var startCandidates in candidateGroups)
             {
-                //Console.WriteLine("test candidate");
-                var candidates = new List<HillMotif>();
-                foreach (var sequence in baseCandidate.Mers(l))
-                {
-                    var m = new HillMotif(new Neighbour(sequence), value(sequence, sequences));
-                    candidates.Add(m);
-                    if (m.IsMotif(d))
-                        return m.Sequence.toSequence();
-                }
+                var candidates = startCandidates.ToList();
 
-                candidates = candidates.OrderBy((x) => x.dist).ToList();
-
-                for (int i = 0; i < keep.Length; i++)
+                for (var i = 0; i < keep.Length; i++)
                 {
-                    for (int j = 0; j < keep[i] && j < candidates.Count; j++)
+                    var newCandidates = new List<HillMotif>();
+
+                    var takeNbr = Math.Min((int) Math.Ceiling(keep[i] * candidates.Count), candidates.Count);
+
+                    foreach (var candidate in candidates.Take(takeNbr))
                     {
-                        var res = ClimbOfDist(candidates[j], sequences, d, i + 1);
-                        candidates.Add(res);
+                        var res = Climb(candidate, sequences, d, i);
+                        newCandidates.Add(res);
 
                         if (res.IsMotif(d))
-                        {
-                            //Console.WriteLine("found on: " + j);
                             return res.Sequence.toSequence();
-                        }
+
                     }
 
-                    candidates = candidates.OrderBy((x) => x.dist).ToList();
+                    candidates = newCandidates.OrderBy((x) => x.dist).ToList();
                 }
             }
-
 
             return null;
         }
 
-        public HillMotif ClimbOfDist(HillMotif motif, List<Sequence> sequences, int d, int dist)
+        public HillMotif Climb(HillMotif motif, List<Sequence> sequences, int d, int dist)
         {
             var best = motif;
 
+            if (dist == 0) return motif;
 
-            if ((int) best.dist <= d)
-                return best;
-
-
-            HillMotif newBest = best;
-            bool changed;
-            do
+            for (var i = dist; i <= dist; i++)
             {
-                changed = false;
-                best = newBest;
-
-                foreach (var s in _generator.NeighboursOfDist(best.Sequence, dist))
+                var changed = true;
+                while (changed)
                 {
-                    var n = new HillMotif(s, value(s.toSequence(), sequences));
+                    changed = false;
 
-                    if (n.dist < newBest.dist)
+                    foreach (var s in _generator.NeighboursOfDist(best.Sequence, i))
                     {
-                        newBest = n;
-                        changed = true;
+                        var n = new HillMotif(s, value(s.toSequence(), sequences));
 
-                        if (newBest.IsMotif(d))
-                            return newBest;
+                        if (n.dist < best.dist)
+                        {
+                            best = n;
+                            changed = true;
+                            i = 1;
+
+                            if (best.IsMotif(d))
+                                return best;
+                        }
                     }
                 }
-            } while (changed);
-
+            }
 
             return best;
         }
