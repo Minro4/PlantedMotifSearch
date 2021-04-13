@@ -10,12 +10,12 @@ namespace PlantedMotifSearch
     {
         private SequenceGenerator _generator;
 
-        private double[] keep =
+        private int[] keep =
         {
-            1, 0.01, 0.01
+            5, 1
         };
 
-        public AdaptiveHillClimbing(SequenceGenerator generator, double[] keep = null)
+        public AdaptiveHillClimbing(SequenceGenerator generator, int[] keep = null)
         {
             _generator = generator;
             if (keep != null)
@@ -28,21 +28,22 @@ namespace PlantedMotifSearch
         }
 
 
-        private Sequence AdaptiveSearch(List<Sequence> sequences, int l, int d, double[] keep)
+        private Sequence AdaptiveSearch(List<Sequence> sequences, int l, int d, int[] keep)
         {
-            var candidateGroups = sequences.Select(s => s.Mers(l).Select(lmers => new HillMotif(new Neighbour(lmers), value(lmers, sequences))));
+            var candidateGroups = sequences.Select(s => s.Mers(l)
+                                                         .Select(lmers => new HillMotif(new Neighbour(lmers), value(lmers, sequences))));
 
             foreach (var startCandidates in candidateGroups)
             {
-                var candidates = startCandidates.ToList();
+                var candidates = startCandidates;
 
-                for (var i = 0; i < keep.Length; i++)
+                for (var i = 0; i <= keep.Length; i++)
                 {
                     var newCandidates = new List<HillMotif>();
 
-                    var takeNbr = Math.Min((int) Math.Ceiling(keep[i] * candidates.Count), candidates.Count);
+                    var candidatesToEvaluate = i == 0 ? candidates : candidates.Take(keep[i - 1]);
 
-                    foreach (var candidate in candidates.Take(takeNbr))
+                    foreach (var candidate in candidatesToEvaluate)
                     {
                         var res = Climb(candidate, sequences, d, i);
                         newCandidates.Add(res);
@@ -52,7 +53,7 @@ namespace PlantedMotifSearch
 
                     }
 
-                    candidates = newCandidates.OrderBy((x) => x.dist).ToList();
+                    candidates = newCandidates.OrderBy((x) => x.dist);
                 }
             }
 
