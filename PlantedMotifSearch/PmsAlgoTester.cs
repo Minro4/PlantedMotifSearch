@@ -8,12 +8,19 @@ namespace PlantedMotifSearch
     public class PmsAlgoTester
     {
         private PmsAlgorithm algorithm;
+
         private SequenceGenerator generator;
 
-        public PmsAlgoTester(SequenceGenerator generator, PmsAlgorithm algorithm)
+        private int nbrSequences = 20;
+
+        private int nbrCharacters = 600;
+
+        public PmsAlgoTester(SequenceGenerator generator, PmsAlgorithm algorithm, int nbrSequences, int nbrCharacters)
         {
             this.algorithm = algorithm;
             this.generator = generator;
+            this.nbrSequences = nbrSequences;
+            this.nbrCharacters = nbrCharacters;
         }
 
         public void TestMultiple(int startL, int endL, int startD, int endD, int sampleSize, string fileName)
@@ -70,7 +77,7 @@ namespace PlantedMotifSearch
             for (int i = 0; i < sampleSize; i++)
             {
                 Console.WriteLine(i);
-                var (motif, s) = generator.PlantedMotif(l, d, 20, 600);
+                var (motif, s) = generator.PlantedMotif(l, d, nbrSequences, nbrCharacters);
 
                 var watch = new Stopwatch();
                 watch.Start();

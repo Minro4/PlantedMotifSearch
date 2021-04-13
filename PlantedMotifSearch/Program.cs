@@ -5,7 +5,14 @@ namespace PlantedMotifSearch
 {
     class Program
     {
-        private static readonly char[] alphabet = new[] {'A', 'C', 'G', 'T'};
+        private static readonly char[] alphabet = new[]
+        {
+            'A', 'C', 'G', 'T'
+        };
+
+        private static readonly int nbrSequences = 20;
+
+        private static readonly int nbrCharacters = 600;
 
         static void Main(string[] args)
         {
@@ -19,9 +26,9 @@ namespace PlantedMotifSearch
 
         static void RunAlgo(PmsAlgorithm algo, SequenceGenerator gen, int l = 26, int d = 11)
         {
-            (var motif, var s) = gen.PlantedMotif(l, d, 20, 600);
+            (var motif, var s) = gen.PlantedMotif(l, d, nbrSequences, nbrCharacters);
 
-            var foundMotif = new AdaptiveHillClimbing(gen).Search(s, l, d);
+            var foundMotif = algo.Search(s, l, d);
 
             Console.WriteLine("Motif: " + motif.toString());
             Console.WriteLine("Found motif: " + foundMotif.toString());
@@ -29,7 +36,7 @@ namespace PlantedMotifSearch
 
         static void TestOnce(PmsAlgorithm algo, SequenceGenerator gen, int l = 26, int d = 11, int sampleSize = 10)
         {
-            var (a, b) = new PmsAlgoTester(gen, algo).Test(l, d, sampleSize);
+            var (a, b) = new PmsAlgoTester(gen, algo, nbrSequences, nbrCharacters).Test(l, d, sampleSize);
             Console.WriteLine("success: " + a);
             Console.WriteLine("time: " + b);
         }
@@ -37,7 +44,7 @@ namespace PlantedMotifSearch
         //Writes to an excel sheet
         static void TestMultiple(PmsAlgorithm algo, SequenceGenerator gen, string fileName = "test.xlsx")
         {
-            new PmsAlgoTester(gen, algo).TestMultiple(20, 40, 8, 25, 10, fileName);
+            new PmsAlgoTester(gen, algo, nbrSequences, nbrCharacters).TestMultiple(13, 50, 4, 25, 10, fileName);
         }
     }
 }
