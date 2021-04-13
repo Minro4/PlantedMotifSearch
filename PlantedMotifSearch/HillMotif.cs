@@ -8,6 +8,7 @@ namespace PlantedMotifSearch
     public struct HillMotif
     {
         public Neighbour Sequence;
+
         public double dist;
 
 
@@ -15,6 +16,11 @@ namespace PlantedMotifSearch
         {
             Sequence = sequence;
             this.dist = dist;
+        }
+
+        public bool IsMotif(int d)
+        {
+            return (int) dist <= d;
         }
 
         /*

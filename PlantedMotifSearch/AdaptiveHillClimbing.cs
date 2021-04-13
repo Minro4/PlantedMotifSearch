@@ -9,7 +9,11 @@ namespace PlantedMotifSearch
     public class AdaptiveHillClimbing : PmsAlgorithm
     {
         private SequenceGenerator _generator;
-        private int[] keep = {5, 1};
+
+        private int[] keep =
+        {
+            5, 1
+        };
 
         public AdaptiveHillClimbing(SequenceGenerator generator, int[] keep = null)
         {
@@ -35,7 +39,7 @@ namespace PlantedMotifSearch
                 {
                     var m = new HillMotif(new Neighbour(sequence), value(sequence, sequences));
                     candidates.Add(m);
-                    if ((int) m.dist <= d)
+                    if (m.IsMotif(d))
                         return m.Sequence.toSequence();
                 }
 
@@ -48,7 +52,7 @@ namespace PlantedMotifSearch
                         var res = ClimbOfDist(candidates[j], sequences, d, i + 1);
                         candidates.Add(res);
 
-                        if ((int) res.dist <= d)
+                        if (res.IsMotif(d))
                         {
                             //Console.WriteLine("found on: " + j);
                             return res.Sequence.toSequence();
@@ -88,7 +92,7 @@ namespace PlantedMotifSearch
                         newBest = n;
                         changed = true;
 
-                        if ((int) newBest.dist <= d)
+                        if (newBest.IsMotif(d))
                             return newBest;
                     }
                 }
